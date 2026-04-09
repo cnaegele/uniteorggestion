@@ -65,21 +65,21 @@ const contexteChoix = ref<string>(props.contexteChoix)
 console.log(contexteChoix.value)
 let txtContexte = ref<string>('')
 if (contexteChoix.value === 'edition') {
-  txtContexte.value = `Sélection de l'unité à éditer`  
+  txtContexte.value = `Sélection de l'unité à éditer`
 } else if (contexteChoix.value === 'creation') {
-  txtContexte.value = `Sélection de l'unité parente de la nouvelle unité`  
+  txtContexte.value = `Sélection de l'unité parente de la nouvelle unité`
 } else {
-  txtContexte.value = `Sélection d'une unité, contexte non prévu`  
-}watch(() => props.contexteChoix, (newValue) => {
+  txtContexte.value = `Sélection d'une unité, contexte non prévu`
+} watch(() => props.contexteChoix, (newValue) => {
   contexteChoix.value = newValue
-let txtContexte = ref<string>('')
-if (contexteChoix.value === 'edition') {
-  txtContexte.value = `Sélection de l'unité à éditer`  
-} else if (contexteChoix.value === 'creation') {
-  txtContexte.value = `Sélection de l'unité parente de la nouvelle unité`  
-} else {
-  txtContexte.value = `Sélection d'une unité, contexte non prévu`  
-}
+  let txtContexte = ref<string>('')
+  if (contexteChoix.value === 'edition') {
+    txtContexte.value = `Sélection de l'unité à éditer`
+  } else if (contexteChoix.value === 'creation') {
+    txtContexte.value = `Sélection de l'unité parente de la nouvelle unité`
+  } else {
+    txtContexte.value = `Sélection d'une unité, contexte non prévu`
+  }
 })
 
 const buniteHorsVdL = ref<boolean>(props.uniteHorsVdL)
