@@ -7,7 +7,7 @@
         <v-main>
             <v-app-bar color="primary" prominent density="compact" app>
                 <v-toolbar-title>Gestion des unités organisationnelles&nbsp;<small>(version {{ version
-                }})</small></v-toolbar-title>
+                        }})</small></v-toolbar-title>
                 <v-spacer></v-spacer>
                 <div style="position: absolute; right: 16px;">
                     Utilisateur: {{ callerInformation?.prenom }} {{ callerInformation?.nom }} ({{
@@ -29,142 +29,73 @@
                     </v-row>
                 </v-container>
 
-  <v-card class="pa-6 ml-6" max-width="1200" v-if="cardSaisie">
-    <v-card-title class="text-h5 mb-4">Unité organisationnelle</v-card-title>
- 
-    <v-card-text>
-      <!-- Nom -->
-      <v-text-field
-        v-model="form.nom"
-        label="Nom"
-        variant="outlined"
-        density="comfortable"
-        class="mb-3"
-      />
- 
-      <!-- Description -->
-      <v-text-field
-        v-model="form.description"
-        label="Description"
-        variant="outlined"
-        density="comfortable"
-        class="mb-3"
-      />
- 
-      <!-- Hiérarchie (lecture seule) -->
-      <v-text-field
-        :model-value="form.desctree"
-        label="Hiérarchie"
-        variant="outlined"
-        density="comfortable"
-        readonly
-        bg-color="grey-lighten-4"
-        class="mb-3"
-      />
- 
-      <!-- Type (select) -->
-      <v-select
-        v-model="form.idtype"
-        :items="typesUO"
-        item-title="text"
-        item-value="value"
-        label="Type"
-        variant="outlined"
-        density="comfortable"
-        class="mb-3"
-      />
- 
-      <!-- Unité parente (lecture seule + bouton choix) -->
-      <div class="d-flex align-center ga-3 mb-3">
-        <v-text-field
-          :model-value="form.nomparent"
-          label="Unité parente"
-          variant="outlined"
-          density="comfortable"
-          readonly
-          bg-color="grey-lighten-4"
-          hide-details
-        />
-        <v-btn
-          color="primary"
-          variant="tonal"
-          @click="onChoixParent"
-        >
-          Choix
-        </v-btn>
-      </div>
- 
-      <!-- Couleur -->
-      <div class="d-flex align-center ga-3 mb-3">
-        <v-text-field
-          v-model="form.couleur"
-          label="Couleur"
-          variant="outlined"
-          density="comfortable"
-          hide-details
-        >
-          <template #prepend-inner>
-            <div
-              :style="{ backgroundColor: form.couleur, width: '24px', height: '24px', borderRadius: '4px', border: '1px solid #ccc' }"
-            />
-          </template>
-        </v-text-field>
- 
-        <v-menu :close-on-content-click="false">
-          <template #activator="{ props }">
-            <v-btn
-              v-bind="props"
-              color="primary"
-              variant="tonal"
-              icon="mdi-palette"
-            />
-          </template>
-          <v-color-picker v-model="form.couleur" mode="hexa" />
-        </v-menu>
-      </div>
+                <v-card class="pa-6 ml-6" max-width="1200" v-if="cardSaisie">
+                    <v-card-title class="text-h5 mb-4">Unité organisationnelle</v-card-title>
 
-      <!-- Actif -->
-<v-switch
-  v-model="form.bactif"
-  label="Actif"
-  color="primary"
-  :true-value="true"
-  :false-value="false"
-  hide-details
-  class="mb-3"
-/>
+                    <v-card-text>
+                        <!-- Nom -->
+                        <v-text-field v-model="form.nom" label="Nom" variant="outlined" density="comfortable"
+                            class="mb-3" />
 
-<!-- Visible -->
-<v-switch
-  v-model="form.bvisible"
-  label="Visible"
-  color="primary"
-  :true-value="true"
-  :false-value="false"
-  hide-details
-  class="mb-3"
-/>
-    </v-card-text>
+                        <!-- Description -->
+                        <v-text-field v-model="form.description" label="Description" variant="outlined"
+                            density="comfortable" class="mb-3" />
 
-<v-card-actions class="px-6 pb-4">
-  <v-spacer />
-  <v-btn
-    variant="outlined"
-    color="grey"
-    @click="onQuitter"
-  >
-    {{ isModified ? 'Quitter sans sauver' : 'Quitter' }}
-  </v-btn>
-  <v-btn v-if="isModified"
-    variant="flat"
-    color="primary"
-    @click="onSauver"
-  >
-    Sauver
-  </v-btn>
-</v-card-actions>    
-  </v-card>
-</div>
+                        <!-- Hiérarchie (lecture seule) -->
+                        <v-text-field :model-value="form.desctree" label="Hiérarchie" variant="outlined"
+                            density="comfortable" readonly bg-color="grey-lighten-4" class="mb-3" />
+
+                        <!-- Type (select) -->
+                        <v-select v-model="form.idtype" :items="typesUO" item-title="text" item-value="value"
+                            label="Type" variant="outlined" density="comfortable" class="mb-3" />
+
+                        <!-- Unité parente (lecture seule + bouton choix) -->
+                        <div class="d-flex align-center ga-3 mb-3">
+                            <v-text-field :model-value="form.nomparent" label="Unité parente" variant="outlined"
+                                density="comfortable" readonly bg-color="grey-lighten-4" hide-details />
+                            <v-btn color="primary" variant="tonal" @click="onChoixParent">
+                                Choix
+                            </v-btn>
+                        </div>
+
+                        <!-- Couleur -->
+                        <div class="d-flex align-center ga-3 mb-3">
+                            <v-text-field v-model="form.couleur" label="Couleur" variant="outlined"
+                                density="comfortable" hide-details>
+                                <template #prepend-inner>
+                                    <div
+                                        :style="{ backgroundColor: form.couleur, width: '24px', height: '24px', borderRadius: '4px', border: '1px solid #ccc' }" />
+                                </template>
+                            </v-text-field>
+
+                            <v-menu :close-on-content-click="false">
+                                <template #activator="{ props }">
+                                    <v-btn v-bind="props" color="primary" variant="tonal" icon="mdi-palette" />
+                                </template>
+                                <v-color-picker v-model="form.couleur" mode="hexa" />
+                            </v-menu>
+                        </div>
+
+                        <!-- Actif -->
+                        <v-switch v-model="form.bactif" label="Actif" color="primary" :true-value="true"
+                            :false-value="false" hide-details class="mb-3" />
+
+                        <!-- Visible -->
+                        <v-switch v-model="form.bvisible" label="Visible" color="primary" :true-value="true"
+                            :false-value="false" hide-details class="mb-3" />
+                    </v-card-text>
+
+                    <v-card-actions class="px-6 pb-4">
+                        <v-spacer />
+                        <v-btn variant="outlined" color="grey" @click="onQuitter">
+                            {{ isModified ? 'Quitter sans sauver' : 'Quitter' }}
+                        </v-btn>
+                        <v-btn v-if="isModified" variant="flat" color="primary" @click="onSauver">
+                            Sauver
+                        </v-btn>
+                    </v-card-actions>
+                </v-card>
+            </div>
         </v-main>
     </v-app>
 
@@ -234,29 +165,29 @@ const onCreation = () => {
 
 // État réactif du formulaire
 const form = reactive({
-  nom: '',
-  description: '',
-  desctree: '',
-  idtype: 0,
-  nomparent: '',
-  couleur: '',
-  bactif: true,
-  bvisible: true
+    nom: '',
+    description: '',
+    desctree: '',
+    idtype: 0,
+    nomparent: '',
+    couleur: '',
+    bactif: true,
+    bvisible: true
 })
- 
+
 // Options du select Type
 const typesUO = [
-  { value: 2, text: 'Direction' },
-  { value: 3, text: 'Service' },
-  { value: 7, text: 'Division' },
-  { value: 6, text: 'Unité' },
+    { value: 2, text: 'Direction' },
+    { value: 3, text: 'Service' },
+    { value: 7, text: 'Division' },
+    { value: 6, text: 'Unité' },
 ]
 
 watch(form, () => {
-console.log('dans watch: loading', loading.value)
-  if (!loading.value) {
-    isModified.value = true
-  }
+    console.log('dans watch: loading', loading.value)
+    if (!loading.value) {
+        isModified.value = true
+    }
 }, { deep: true })
 
 const receptionUniteOrg = async (jsonData: string) => {
@@ -265,28 +196,28 @@ const receptionUniteOrg = async (jsonData: string) => {
     const response: ApiResponseUOD = await getUniteOrgData(ssServer.value, ssPageData.value, JSON.stringify(jsonCriteres))
     const uniteOrgData: UniteOrganisationnelleData[] = response.success && response.data ? response.data : []
     console.log(uniteOrgData[0])
- 
-  if (uniteOrgData.length > 0) {
-    dialogChoixUO.value = false
-    cardSaisie.value = true
-    const item = uniteOrgData[0]
-    loading.value = true
-    form.nom = item.nom
-    form.description = item.description
-    form.desctree = item.desctree
-    form.idtype = item.idtype
-    form.nomparent = item.parentnom ?? ''
-    form.couleur = item.couleur
-    form.bactif = item.bactif === 0 === false
-    form.bvisible = item.bcache === 1 === false
-    await nextTick()
-    loading.value = false
-  }
+
+    if (uniteOrgData.length > 0) {
+        dialogChoixUO.value = false
+        cardSaisie.value = true
+        const item = uniteOrgData[0]
+        loading.value = true
+        form.nom = item.nom
+        form.description = item.description
+        form.desctree = item.desctree
+        form.idtype = item.idtype
+        form.nomparent = item.parentnom ?? ''
+        form.couleur = item.couleur
+        form.bactif = item.bactif === 0 === false
+        form.bvisible = item.bcache === 1 === false
+        await nextTick()
+        loading.value = false
+    }
 }
- 
+
 // Clic sur le bouton Choix (à compléter)
 const onChoixParent = () => {
-  // TODO : logique de sélection du parent
+    // TODO : logique de sélection du parent
 }
 
 
@@ -296,14 +227,14 @@ const closeChoixUO = (): void => {
 }
 
 const onQuitter = () => {
-  // TODO : logique de fermeture
-  cardSaisie.value = false
-  isBtnDisabled.value = false
+    // TODO : logique de fermeture
+    cardSaisie.value = false
+    isBtnDisabled.value = false
 }
 
 const onSauver = () => {
-  // TODO : logique de sauvegarde
-  isModified.value = false
+    // TODO : logique de sauvegarde
+    isModified.value = false
 }
 
 const receptionCallerInfo = (jsonData: string) => {
