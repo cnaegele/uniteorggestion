@@ -7,7 +7,7 @@
         <v-main>
             <v-app-bar color="primary" prominent density="compact" app>
                 <v-toolbar-title>Gestion des unités organisationnelles&nbsp;<small>(version {{ version
-                        }})</small></v-toolbar-title>
+                }})</small></v-toolbar-title>
                 <v-spacer></v-spacer>
                 <div style="position: absolute; right: 16px;">
                     Utilisateur: {{ callerInformation?.prenom }} {{ callerInformation?.nom }} ({{
@@ -41,21 +41,33 @@
                         <v-text-field v-model="form.description" label="Description" variant="outlined"
                             density="comfortable" class="mb-3" />
 
+                        <!-- Abréviation -->
+                        <v-text-field v-model="form.abreviation" label="Abréviation" variant="outlined"
+                            density="comfortable" class="mb-3" style="max-width: 200px;" />
+
                         <!-- Hiérarchie (lecture seule) -->
                         <v-text-field :model-value="form.desctree" label="Hiérarchie" variant="outlined"
                             density="comfortable" readonly bg-color="grey-lighten-4" class="mb-3" />
 
                         <!-- Type (select) -->
                         <v-select v-model="form.idtype" :items="typesUO" item-title="text" item-value="value"
-                            label="Type" variant="outlined" density="comfortable" class="mb-3" />
+                            label="Type" variant="outlined" density="comfortable" class="mb-3"  style="max-width: 300px;" />
 
                         <!-- Unité parente (lecture seule + bouton choix) -->
-                        <div class="d-flex align-center ga-3 mb-3">
+                        <div class="d-flex align-center ga-3 mb-8">
                             <v-text-field :model-value="form.nomparent" label="Unité parente" variant="outlined"
                                 density="comfortable" readonly bg-color="grey-lighten-4" hide-details />
                             <v-btn color="primary" variant="tonal" @click="onChoixParent">
                                 Choix
                             </v-btn>
+                        </div>
+
+                        <!-- Code ordre -->
+                        <div class="d-flex align-center ga-3 mb-3">
+                            <v-text-field v-model="form.codeordre" label="Code ordre" variant="outlined"
+                                density="comfortable" style="max-width: 200px;" />
+                            <v-text-field v-model="form.codeordreparent" label="Code ordre parent" variant="outlined"
+                                density="comfortable" style="max-width: 200px;" readonly bg-color="grey-lighten-4" />
                         </div>
 
                         <!-- Couleur -->
@@ -167,9 +179,12 @@ const onCreation = () => {
 const form = reactive({
     nom: '',
     description: '',
+    abreviation: '',
     desctree: '',
     idtype: 0,
     nomparent: '',
+    codeordreparent: '',
+    codeordre: '',
     couleur: '',
     bactif: true,
     bvisible: true
@@ -204,10 +219,17 @@ const receptionUniteOrg = async (jsonData: string) => {
         loading.value = true
         form.nom = item.nom
         form.description = item.description
+        if (item.abreviation !== 'NULL') {
+            form.abreviation = item.abreviation ?? ''
+        }
         form.desctree = item.desctree
         form.idtype = item.idtype
         form.nomparent = item.parentnom ?? ''
-        form.couleur = item.couleur
+        form.codeordreparent = item.parentcodeordre ?? ''
+        form.codeordre = item.codeordre ?? ''
+        if (item.couleur !== 'NULL') {
+            form.couleur = item.couleur ?? ''
+        }
         form.bactif = item.bactif === 0 === false
         form.bvisible = item.bcache === 1 === false
         await nextTick()
