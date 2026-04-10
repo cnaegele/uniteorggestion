@@ -64,10 +64,30 @@ export async function getUnitesOrgListe(server: string = '', page: string, jsonC
 
 export async function getUniteOrgData(server: string = '', page: string, jsonCriteres: string = '{}'): Promise<ApiResponseUOD> {
     console.log(jsonCriteres)
-    const urluol: string = `${server}${page}`
+    const urluod: string = `${server}${page}`
     const params = new URLSearchParams([['jsoncriteres', jsonCriteres]])
     try {
-        const response: AxiosResponse<UniteOrganisationnelleData[]> = await axios.get(urluol, { params })
+        const response: AxiosResponse<UniteOrganisationnelleData[]> = await axios.get(urluod, { params })
+        const respData: ApiResponseUOD = {
+            "success": true,
+            "message": `ok`,
+            "data": response.data
+        }
+        console.log(respData)
+        return respData
+    } catch (error) {
+        return traiteAxiosError(error as AxiosError)
+    }
+}
+
+export async function sauveUniteOrgData(server: string = '', page: string, jsonData: string = '{}'): Promise<ApiResponseUOD> {
+    const urluos: string = `${server}${page}`
+    try {
+        const response: AxiosResponse<UniteOrganisationnelleData[]> = await axios.post(urluos, jsonData, {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
         const respData: ApiResponseUOD = {
             "success": true,
             "message": `ok`,

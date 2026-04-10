@@ -126,16 +126,13 @@
             </v-card-actions>
         </v-card>
     </v-dialog>
-
-
 </template>
-
 
 <script lang="ts" setup>
 import type { ApiResponseUI, UserInfo } from './CallerInfo.vue'
 import type { ApiResponseIG } from './CallerIsInGroup.vue'
 import type { UniteOrganisationnelleData, ApiResponseUOD } from '@/axioscalls.ts'
-import { getUniteOrgData } from '@/axioscalls.ts'
+import { getUniteOrgData, sauveUniteOrgData } from '@/axioscalls.ts'
 import CallerInfo from '@/components/CallerInfo.vue'
 import CallerIsInGroup from '@/components/CallerIsInGroup.vue'
 import UniteOrgChoix from '@/components/UniteOrgChoix.vue'
@@ -153,6 +150,7 @@ if (import.meta.env.DEV) {
     ssServer.value = 'https://mygolux.lausanne.ch'
 }
 const ssPageData = ref<string>('/goeland/uniteorg/axios/uniteorg_data.php')
+const ssPageSauve = ref<string>('/goeland/uniteorg/axios/uniteorg_sauve.php')
 
 const modeChoixUO = ref<string>('unique')
 const contexteChoixUO = ref<string>('')
@@ -161,7 +159,6 @@ const cardSaisie = ref<boolean>(false)
 const isBtnDisabled = ref(false)
 const isModified = ref(false)
 const loading = ref(false)
-
 
 const onEdition = () => {
     isBtnDisabled.value = true
@@ -177,6 +174,8 @@ const onCreation = () => {
 
 // État réactif du formulaire
 const form = reactive({
+    id: 0,
+    idparent: 0,
     nom: '',
     description: '',
     abreviation: '',
@@ -192,6 +191,7 @@ const form = reactive({
 
 // Options du select Type
 const typesUO = [
+    { value: 0, text: '- choisir le type d\'unité' },
     { value: 2, text: 'Direction' },
     { value: 3, text: 'Service' },
     { value: 7, text: 'Division' },
@@ -199,7 +199,6 @@ const typesUO = [
 ]
 
 watch(form, () => {
-    console.log('dans watch: loading', loading.value)
     if (!loading.value) {
         isModified.value = true
     }
@@ -212,36 +211,66 @@ const receptionUniteOrg = async (jsonData: string) => {
     const uniteOrgData: UniteOrganisationnelleData[] = response.success && response.data ? response.data : []
     console.log(uniteOrgData[0])
 
-    if (uniteOrgData.length > 0) {
-        dialogChoixUO.value = false
-        cardSaisie.value = true
-        const item = uniteOrgData[0]
-        loading.value = true
-        form.nom = item.nom
-        form.description = item.description
-        if (item.abreviation !== 'NULL') {
-            form.abreviation = item.abreviation ?? ''
+    if (contexteChoixUO.value === 'edition') {
+        if (uniteOrgData.length > 0) {
+            dialogChoixUO.value = false
+            cardSaisie.value = true
+            const item = uniteOrgData[0]
+            loading.value = true
+            form.id = item.id
+            form.idparent = item.idparent ?? 0
+            form.nom = item.nom
+            form.description = item.description
+            if (item.abreviation !== 'NULL') {
+                form.abreviation = item.abreviation ?? ''
+            }
+            form.desctree = item.desctree
+            form.idtype = item.idtype
+            form.nomparent = item.parentnom ?? ''
+            form.codeordreparent = item.parentcodeordre ?? ''
+            form.codeordre = item.codeordre ?? ''
+            if (item.couleur !== 'NULL') {
+                form.couleur = item.couleur ?? ''
+            }
+            form.bactif = item.bactif === 0 === false
+            form.bvisible = item.bcache === 1 === false
+            await nextTick()
+            loading.value = false
         }
-        form.desctree = item.desctree
-        form.idtype = item.idtype
-        form.nomparent = item.parentnom ?? ''
-        form.codeordreparent = item.parentcodeordre ?? ''
-        form.codeordre = item.codeordre ?? ''
-        if (item.couleur !== 'NULL') {
-            form.couleur = item.couleur ?? ''
-        }
-        form.bactif = item.bactif === 0 === false
-        form.bvisible = item.bcache === 1 === false
-        await nextTick()
-        loading.value = false
     }
+    else if (contexteChoixUO.value === 'creation') {
+        if (uniteOrgData.length > 0) {
+            dialogChoixUO.value = false
+            cardSaisie.value = true
+            const item = uniteOrgData[0]
+            loading.value = true
+            form.desctree = `${item.desctree} / ${form.nom}`
+            form.idparent = item.id
+            form.nomparent = item.nom ?? ''
+            form.codeordreparent = item.codeordre ?? ''
+            form.codeordre = `${item.codeordre ?? ''}.`
+            await nextTick()
+            loading.value = false
+        }
+    }
+    else if (contexteChoixUO.value === 'choixparent') {
+        if (uniteOrgData.length > 0) {
+            dialogChoixUO.value = false
+            const item = uniteOrgData[0]
+            form.desctree = `${item.desctree} / ${form.nom}`
+            form.idparent = item.id
+            form.nomparent = item.nom ?? ''
+            form.codeordreparent = item.codeordre ?? ''
+            //form.codeordreparent = item.codeordre ?? ''
+        }
+    }
+
 }
 
-// Clic sur le bouton Choix (à compléter)
 const onChoixParent = () => {
-    // TODO : logique de sélection du parent
+    dialogChoixUO.value = true
+    contexteChoixUO.value = 'choixparent'
 }
-
 
 const closeChoixUO = (): void => {
     dialogChoixUO.value = false
@@ -249,14 +278,16 @@ const closeChoixUO = (): void => {
 }
 
 const onQuitter = () => {
-    // TODO : logique de fermeture
     cardSaisie.value = false
     isBtnDisabled.value = false
 }
 
-const onSauver = () => {
-    // TODO : logique de sauvegarde
+const onSauver = async () => {
     isModified.value = false
+    const jsonData: string = JSON.stringify(form)
+    const response: ApiResponseUOD = await sauveUniteOrgData(ssServer.value, ssPageSauve.value, JSON.stringify(form))
+    const uniteOrgData: UniteOrganisationnelleData[] = response.success && response.data ? response.data : []
+    console.log(uniteOrgData)
 }
 
 const receptionCallerInfo = (jsonData: string) => {
