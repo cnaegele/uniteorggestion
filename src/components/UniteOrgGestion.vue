@@ -192,6 +192,7 @@ const form = reactive({
     desctree: '',
     idtype: 0,
     nomparent: '',
+    desctreeparent: '',
     codeordreparent: '',
     codeordre: '',
     couleur: '',
@@ -214,6 +215,10 @@ watch(form, () => {
     }
 }, { deep: true })
 
+watch(() => form.nom, () => {
+    form.desctree = `${form.desctreeparent} / ${form.nom}`
+})
+
 const receptionUniteOrg = async (jsonData: string) => {
     const oData = JSON.parse(jsonData)
     const jsonCriteres: { uniteorgid: number } = { "uniteorgid": oData.id }
@@ -235,6 +240,7 @@ const receptionUniteOrg = async (jsonData: string) => {
                 form.abreviation = item.abreviation ?? ''
             }
             form.desctree = item.desctree
+            form.desctreeparent = item.parentdesctree ?? ''
             form.idtype = item.idtype
             form.nomparent = item.parentnom ?? ''
             form.codeordreparent = item.parentcodeordre ?? ''

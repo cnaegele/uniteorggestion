@@ -12,6 +12,7 @@ export interface UniteOrganisationnelleData {
     id: number
     idparent: number | null
     parentnom: string | null
+    parentdesctree: string | null
     parentcodeordre: string | null
     nom: string
     description: string
