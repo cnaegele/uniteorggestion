@@ -5,7 +5,7 @@ require_once 'gdt/cldbgoeland.php';
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers:  *");
 header("Access-Control-Allow-Methods:  POST");
-$idCaller = 6;
+$idCaller = 0;
 if (array_key_exists('empid', $_SESSION)) {
     $idCaller = $_SESSION['empid'];
 }
