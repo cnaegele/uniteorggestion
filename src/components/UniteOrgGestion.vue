@@ -267,8 +267,8 @@ const receptionUniteOrg = async (jsonData: string) => {
             form.description = ''
             form.abreviation = ''
             form.desctree = item.desctree
+            form.desctreeparent = item.desctree
             form.idtype = item.idtype
-            form.desctree = `${item.desctree} / ${form.nom}`
             form.nomparent = item.nom ?? ''
             form.codeordreparent = item.codeordre ?? ''
             form.codeordre = `${item.codeordre ?? ''}.`
