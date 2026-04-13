@@ -22,6 +22,9 @@ if ($idCaller > 0) {
         $description = $oData->description;
         $description = utf8go_decode($description);
         $description = str_replace("'", "''", $description);
+        $descTreeDenorm = $oData->desctree;
+        $descTreeDenorm = utf8go_decode($descTreeDenorm);
+        $descTreeDenorm = str_replace("'", "''", $descTreeDenorm);
         $abreviation = $oData->abreviation;
         $abreviation = utf8go_decode($abreviation);
         $abreviation = str_replace("'", "''", $abreviation);
@@ -56,6 +59,11 @@ if ($idCaller > 0) {
         }
         if ($description != '') {
             $sSql .= ", '$description'";
+        } else {
+            $sSql .= ", NULL";
+        }
+        if ($descTreeDenorm != '') {
+            $sSql .= ", '$descTreeDenorm'";
         } else {
             $sSql .= ", NULL";
         }
