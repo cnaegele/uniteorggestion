@@ -30,7 +30,7 @@
                 </v-container>
 
                 <v-card class="pa-6 ml-6" max-width="1200" v-if="cardSaisie">
-                    <v-card-title class="text-h5 mb-4">Unité organisationnelle</v-card-title>
+                    <v-card-title class="text-h5 mb-4">Unité organisationnelle (id = {{ form.id }})</v-card-title>
 
                     <v-card-text>
                         <!-- Nom -->
@@ -51,7 +51,8 @@
 
                         <!-- Type (select) -->
                         <v-select v-model="form.idtype" :items="typesUO" item-title="text" item-value="value"
-                            label="Type" variant="outlined" density="comfortable" class="mb-3"  style="max-width: 300px;" />
+                            label="Type" variant="outlined" density="comfortable" class="mb-3"
+                            style="max-width: 300px;" />
 
                         <!-- Unité parente (lecture seule + bouton choix) -->
                         <div class="d-flex align-center ga-3 mb-8">
@@ -68,6 +69,13 @@
                                 density="comfortable" style="max-width: 200px;" />
                             <v-text-field v-model="form.codeordreparent" label="Code ordre parent" variant="outlined"
                                 density="comfortable" style="max-width: 200px;" readonly bg-color="grey-lighten-4" />
+                            <v-tooltip v-if="bAttentionCodeOrdre" text="Code ordre et code ordre parent incohérents"
+                                location="top">
+                                <template v-slot:activator="{ props }">
+                                    <v-icon v-bind="props" color="warning" icon="mdi-alert-circle" size="28"
+                                        style="margin-bottom: 22px;" />
+                                </template>
+                            </v-tooltip>
                         </div>
 
                         <!-- Couleur -->
@@ -132,6 +140,7 @@
 import type { ApiResponseUI, UserInfo } from './CallerInfo.vue'
 import type { ApiResponseIG } from './CallerIsInGroup.vue'
 import type { UniteOrganisationnelleData, ApiResponseUOD } from '@/axioscalls.ts'
+import type { UniteOrganisationnelleSaved, ApiResponseUOS } from '@/axioscalls.ts'
 import { getUniteOrgData, sauveUniteOrgData } from '@/axioscalls.ts'
 import CallerInfo from '@/components/CallerInfo.vue'
 import CallerIsInGroup from '@/components/CallerIsInGroup.vue'
@@ -143,6 +152,7 @@ const callerInformation = ref<UserInfo | null | undefined>(null)
 const bGoelandManager = ref<boolean>(false)
 const version = ref<string>(packageJson.version)
 const messageErreur = ref<string | undefined>('')
+const bAttentionCodeOrdre = ref<boolean>(false)
 const messageInfo = ref<string>('')
 
 const ssServer = ref<string>('')
@@ -229,6 +239,7 @@ const receptionUniteOrg = async (jsonData: string) => {
             form.nomparent = item.parentnom ?? ''
             form.codeordreparent = item.parentcodeordre ?? ''
             form.codeordre = item.codeordre ?? ''
+            bAttentionCodeOrdre.value = !(form.codeordre.startsWith(form.codeordreparent) && form.codeordre.length > form.codeordreparent.length)
             if (item.couleur !== 'NULL') {
                 form.couleur = item.couleur ?? ''
             }
@@ -244,11 +255,21 @@ const receptionUniteOrg = async (jsonData: string) => {
             cardSaisie.value = true
             const item = uniteOrgData[0]
             loading.value = true
-            form.desctree = `${item.desctree} / ${form.nom}`
+            form.id = 0
             form.idparent = item.id
+            form.nom = ''
+            form.description = ''
+            form.abreviation = ''
+            form.desctree = item.desctree
+            form.idtype = item.idtype
+            form.desctree = `${item.desctree} / ${form.nom}`
             form.nomparent = item.nom ?? ''
             form.codeordreparent = item.codeordre ?? ''
             form.codeordre = `${item.codeordre ?? ''}.`
+            bAttentionCodeOrdre.value = true
+            form.couleur = ''
+            form.bactif = true
+            form.bvisible = true
             await nextTick()
             loading.value = false
         }
@@ -264,7 +285,7 @@ const receptionUniteOrg = async (jsonData: string) => {
             //form.codeordreparent = item.codeordre ?? ''
         }
     }
-
+    contexteChoixUO.value = ''
 }
 
 const onChoixParent = () => {
@@ -280,14 +301,21 @@ const closeChoixUO = (): void => {
 const onQuitter = () => {
     cardSaisie.value = false
     isBtnDisabled.value = false
+    messageErreur.value = ''
 }
 
 const onSauver = async () => {
     isModified.value = false
-    const jsonData: string = JSON.stringify(form)
-    const response: ApiResponseUOD = await sauveUniteOrgData(ssServer.value, ssPageSauve.value, JSON.stringify(form))
-    const uniteOrgData: UniteOrganisationnelleData[] = response.success && response.data ? response.data : []
-    console.log(uniteOrgData)
+    const response: ApiResponseUOS = await sauveUniteOrgData(ssServer.value, ssPageSauve.value, JSON.stringify(form))
+    const uniteOrgSaved: UniteOrganisationnelleSaved[] = response.success && response.data ? response.data : []
+    const idRetour = uniteOrgSaved[0].idunitesauve
+    messageErreur.value = ''
+    if (uniteOrgSaved[0].messagesp !== 'ok') {
+        messageErreur.value = uniteOrgSaved[0].messagesp
+        console.log("erreur", messageErreur.value)
+    }
+    contexteChoixUO.value = 'edition'
+    await receptionUniteOrg(`{"id":${idRetour}}`)
 }
 
 const receptionCallerInfo = (jsonData: string) => {
@@ -307,3 +335,18 @@ const receptionCallerInGroupGoelandManager = (jsonData: string) => {
     }
 }
 </script>
+<style scoped>
+#divErreur {
+    background-color: lightsalmon;
+    margin-left: 5px;
+    margin-right: 5px;
+    margin-top: 0px;
+    padding: 5px;
+    border-style: solid;
+    border-width: thin;
+    border-color: black;
+    border-radius: 20px;
+    white-space: pre-line;
+    /* Convertit les \n en sauts de ligne */
+}
+</style>

@@ -25,8 +25,12 @@ export interface UniteOrganisationnelleData {
     couleur: string | null
     bactif: number
     bcache: number
+    messagesp: string | null
 }
-
+export interface UniteOrganisationnelleSaved {
+    idunitesauve: number
+    messagesp: string
+}
 export interface ApiResponseUOL {
     success?: boolean;
     message?: string;
@@ -36,6 +40,11 @@ export interface ApiResponseUOD {
     success?: boolean;
     message?: string;
     data?: UniteOrganisationnelleData[];
+}
+export interface ApiResponseUOS {
+    success?: boolean;
+    message?: string;
+    data?: UniteOrganisationnelleSaved[];
 }
 // Interface générique pour les réponses API
 export interface ApiResponse<T> {
@@ -80,20 +89,20 @@ export async function getUniteOrgData(server: string = '', page: string, jsonCri
     }
 }
 
-export async function sauveUniteOrgData(server: string = '', page: string, jsonData: string = '{}'): Promise<ApiResponseUOD> {
+export async function sauveUniteOrgData(server: string = '', page: string, jsonData: string = '{}'): Promise<ApiResponseUOS> {
     const urluos: string = `${server}${page}`
     try {
-        const response: AxiosResponse<UniteOrganisationnelleData[]> = await axios.post(urluos, jsonData, {
+        const response: AxiosResponse<UniteOrganisationnelleSaved[]> = await axios.post(urluos, jsonData, {
             headers: {
                 'Content-Type': 'application/json'
             }
         })
-        const respData: ApiResponseUOD = {
+        const respData: ApiResponseUOS = {
             "success": true,
             "message": `ok`,
             "data": response.data
         }
-        console.log(respData)
+        console.log("sauverespData", respData)
         return respData
     } catch (error) {
         return traiteAxiosError(error as AxiosError)

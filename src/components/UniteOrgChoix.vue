@@ -68,6 +68,8 @@ if (contexteChoix.value === 'edition') {
   txtContexte.value = `Sélection de l'unité à éditer`
 } else if (contexteChoix.value === 'creation') {
   txtContexte.value = `Sélection de l'unité parente de la nouvelle unité`
+} else if (contexteChoix.value === 'choixparent') {
+  txtContexte.value = `Sélection de la nouvelle unité parente de l'unité`
 } else {
   txtContexte.value = `Sélection d'une unité, contexte non prévu`
 } watch(() => props.contexteChoix, (newValue) => {
