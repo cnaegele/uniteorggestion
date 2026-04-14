@@ -7,7 +7,7 @@
         <v-main>
             <v-app-bar color="primary" prominent density="compact" app>
                 <v-toolbar-title>Gestion des unités organisationnelles&nbsp;<small>(version {{ version
-                }})</small></v-toolbar-title>
+                        }})</small></v-toolbar-title>
                 <v-spacer></v-spacer>
                 <div style="position: absolute; right: 16px;">
                     Utilisateur: {{ callerInformation?.prenom }} {{ callerInformation?.nom }} ({{
@@ -145,8 +145,16 @@ import { getUniteOrgData, sauveUniteOrgData } from '@/axioscalls.ts'
 import CallerInfo from '@/components/CallerInfo.vue'
 import CallerIsInGroup from '@/components/CallerIsInGroup.vue'
 import UniteOrgChoix from '@/components/UniteOrgChoix.vue'
-import { nextTick, reactive, ref, watch } from 'vue'
+import { nextTick, onMounted, reactive, ref, watch } from 'vue'
 import packageJson from '../../package.json'
+
+interface Props {
+    iduo?: number | null
+}
+const props = withDefaults(defineProps<Props>(), {
+    iduo: null
+})
+
 //Data caller et droits caller
 const callerInformation = ref<UserInfo | null | undefined>(null)
 const bGoelandManager = ref<boolean>(false)
@@ -208,6 +216,15 @@ const typesUO = [
     { value: 7, text: 'Division' },
     { value: 6, text: 'Unité' },
 ]
+
+onMounted(async () => {
+    if (props.iduo !== null) {
+        console.log(`unité passée par paramètre iduo : ${props.iduo}`)
+        isBtnDisabled.value = true
+        contexteChoixUO.value = 'edition'
+        await receptionUniteOrg(`{"id":${props.iduo}}`)
+    }
+})
 
 watch(form, () => {
     if (!loading.value) {
@@ -314,14 +331,18 @@ const onSauver = async () => {
     isModified.value = false
     const response: ApiResponseUOS = await sauveUniteOrgData(ssServer.value, ssPageSauve.value, JSON.stringify(form))
     const uniteOrgSaved: UniteOrganisationnelleSaved[] = response.success && response.data ? response.data : []
-    const idRetour = uniteOrgSaved[0].idunitesauve
-    messageErreur.value = ''
-    if (uniteOrgSaved[0].messagesp !== 'ok') {
-        messageErreur.value = uniteOrgSaved[0].messagesp
-        console.log("erreur", messageErreur.value)
+    if (response.data?.toString().substring(0, 6) === 'ERREUR') {
+        messageErreur.value = response.data.toString()
+    } else {
+        const idRetour = uniteOrgSaved[0].idunitesauve
+        messageErreur.value = ''
+        if (uniteOrgSaved[0].messagesp !== 'ok') {
+            messageErreur.value = uniteOrgSaved[0].messagesp
+            console.log("erreur", messageErreur.value)
+        }
+        contexteChoixUO.value = 'edition'
+        await receptionUniteOrg(`{"id":${idRetour}}`)
     }
-    contexteChoixUO.value = 'edition'
-    await receptionUniteOrg(`{"id":${idRetour}}`)
 }
 
 const receptionCallerInfo = (jsonData: string) => {
